@@ -2,9 +2,6 @@
 ## SENSITIVITY ANALYSIS  DUTCH DAIRY SYSTEM  ####
 #################################################
 
-#http://www.stat.umn.edu/geyer/old/5101/rlook.html
-#http://tagteam.harvard.edu/hub_feeds/1981/feed_items/202072
-
 ##############
 ## NITROGEN ##
 ##############
