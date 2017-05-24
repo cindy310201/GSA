@@ -23,17 +23,12 @@ library ("fitdistrplus")                # Fitting distribution
 library ("triangle")					# Triangular distribution for EF
 
 #1. WORKING DIRECTORY
-setwd("C:/Users/uwizeye/Documents/LEAP_PhD_Working_Documents/LEAP_working_documents/NUE_paper_framework/Life_cycle_NUE/3.Third paper")
+setwd("C:/Users/......")
 
 #######################
 # Import input files ##
 #######################
 # Data from FADN
-feed   = read.table("1- Data/2- Dutch data/2. Data file/Feed_production.csv", header = T, sep = ",", row.names = NULL)  #Feed production
-animal = read.table("1- Data/2- Dutch data/2. Data file/Dairy_production.csv", header = T, sep = ",", row.names = NULL)     #Dairy production
-
-animal = animal[-c(250:268),]
-
 
 #################
 ## FUNCTIONS ####
@@ -124,21 +119,7 @@ n= 5000
 
 # ANIMAL#
 #########
-#1.V1       New born dairy calves                   number
-#2.V2       Deceased dairy calves                   number
-#3.V260     dairy cows                              number
-#4.V261     Young stock (0-1 yr)                    number
-#5.V262     Bulls (1-2 yr)                          number
-#6.V263 	Young stock (1-2 yr)                    number
-#7.V264 	Bulls (2yr+)                            number
-
-farm_animal = data.frame (animal$V1, animal$V2, animal$V260, animal$V261, animal$V262, animal$V263, animal$V264)
-
-animal_cate = colSums(farm_animal)
-
-animal_cate = as.vector(as.matrix(animal_cate))
-
-##
+###################################
 x_animal = data.frame(matrix(animal_cate, nrow=n, ncol=length(animal_cate), byrow=TRUE))
 
 # Mortality 
@@ -331,7 +312,7 @@ my_ne_lactation = function (milk,  milk_fat){                               # Mi
 	return(lactation)
 }
 
-af_ne_lactation = my_ne_lactation (milk= milk_year,  milk_fat= x_milkfat) #According to Niyireba,
+af_ne_lactation = my_ne_lactation (milk= milk_year,  milk_fat= x_milkfat) 
 
 # Total GE and Feed intake
 af_ne_total = af_ne_maint + af_ne_activity + af_ne_pregnancy + af_ne_lactation
@@ -387,14 +368,12 @@ mm_ge = data.frame (matrix(0,n,1))
 mm_ge[,1] = ((mm_ne_total/rem) + (mm_ne_growth/reg)) / (x_digest/100)
 
 # Energy content of ration
-# White clover : GE Mean=18.3   sd=0.8  Min=17.5    Max=19.3
-# Kikuyu        : Mean = 18.3    sd=
 
 #Feed intake by day per animal
 my_intake_day = function (ge){
 	intake_day = data.frame (matrix(0,n,1))
 	intake_day[,1] = ge / 18.45                     # Please estimate the energy content of the feed based on feed characteristics
-	return(intake_day)                              # Replace 18.45 by a correct value (18.3)
+	return(intake_day)                              
 }                                                   # Intake_day is the total intake in kg.DM/animal/day
 
 af_intake_day = my_intake_day (ge = af_ge)
@@ -404,7 +383,6 @@ am_intake_day = my_intake_day (ge = am_ge)
 rm_intake_day = my_intake_day (ge = rm_ge)
 mm_intake_day = my_intake_day (ge = mm_ge)
 
-#write.table(af_intake_day, "af_intake_day.csv", sep=",", row.names=FALSE)
 
 #Annual intake
 my_total_intake = function (number, day_intake){
@@ -438,14 +416,7 @@ rm_intake = my_total_intake (number= x_animal[,5], day_intake= rm_intake_day)
 
 feed_uptake_energy = data.frame(feed$F56, feed$F57, feed$F59, feed$F60, feed$F62, feed$F63, feed$F58)
 
-#share_feed = feed_uptake_cate / rowSums(feed_uptake_cate)
-#Barley 1.27 + 9.51 + 0.68 +2.92 
-#Soybean expeller 12.85 
-#Maize 1.18 + 17.42
-#Rapeseed expeller 0.32 + 4.52
-#Palm kernel expeller 19.33 
-#Molasses (Cane) 2.10 
-#Beet pulp 6.34 
+
 # Breaking down of concentrates section, based on Corina thesis page 45
 
 concentrate_share = c(0.18332483,0.16381948,0.23712392,0.06170321,0.24643039,0.10759816)
@@ -839,10 +810,10 @@ my_proc_output = function (prod, loss){
 
 milk_output = my_proc_output (prod = milk_input, loss = 0.0015)
 #output meat See FAO document: http://www.fao.org/wairdocs/lead/x6114e/x6114e00.htm #Contents
-#0.0015 amount of P loss per kg of P in milk
+
 
 #Meat processing : Culling cows, meat female and meat male
-#For af, mf, mm, we consider 
+
 af_n_ret_slaughter = (c_n_ret * af_exit) * 365/1000
 mf_n_ret_slaughter = my_other_n_retention (grow= female_growth, ne_replac = rf_ne_growth, number= af_exit)*365/1000
 
@@ -859,14 +830,7 @@ names(x_carcassd)= "P57"
 
 
 # output meat See FAO document: http://www.fao.org/wairdocs/lead/x6114e/x6114e00.htm #Contents
-#                               http://www.fao.org/wairdocs/lead/x6114e/x6114e04.htm
-# Carcass and edible products   62-64
-# Edible Offal                  3-4%
-# Blood                         3-4%
-# Inedible raw material         8-10%
-# Hide                          7%
-# manure                        8%
-# Shrinkage                     2-10%
+
 
 use_inedible = data.frame(matrix(c(0.16, 0.016), nrow=2,ncol=1)) # this range refers to the % of non-edible products used in other industries
 x_use_inedible = my_trunc(data=use_inedible)
@@ -926,8 +890,7 @@ for (i in 1:ncol(fertiliser_fadn)){
 }
 
 fertiliser_n = data.frame(matrix(0,nrow=2,ncol=11)) # Value from GLEAM SD and van Middelaar - mean*0.1
-#GRAINS CORN    MLSOY   MLRAPE
-#97.2   4.9 51.6    180 4.9 108
+
 	grain_fe = c(97.2, 97.2*0.1)
 	soy_fe   = c(51.6, 51.6*0.1)
 	corn_fe  = c(150, 150*0.1)
@@ -1138,14 +1101,6 @@ x_crop_resid = data.frame (matrix(0, nrow=n, ncol=11))
 
 # Monte carlo simulation for crop residues, see Vellinga et al 2013 Feedpedia page 36
 
-#x_crop_resid = data.frame(matrix(0,n,ncol(crop_resid)))
-#for (i in 1:ncol(crop_resid)){
-#	resid = rnorm (n, crop_resid[,i], crop_resid[,i]*0.1)
-#	x_crop_resid[,i] = resid
-#	names(x_crop_resid) = c("P114","P115","P116","P117","P118","P119","P120","P121","P122","P123","P125")
-#}
-
-# For the sensitivity analysis, use 1:11 remove(7)
 ##############################
 ### COMPUTATION START HERE  ##
 ##############################
@@ -1197,7 +1152,7 @@ total_output_ha = my_output_n_crop (yield= x_yield, ncont= feed_compo_n[1:11])  
 	# Grass silage uptake dairy cattl
 	# Grass (fresh) uptake dairy cattle
 	# Milk products uptake dairy cattle
-#0.03   0.03    0.05    0.03    0.03    0.03
+
 runoff_mean = c(0.03,0.05,0.01,0.05,0.03,0.03,0.03,0.03,0.03,0.03,0.03)
 runoff_sd = runoff_mean *0.1
 runoff = data.frame(matrix(0,2,11))
@@ -1735,14 +1690,12 @@ nhi = my_nhi()
 #########################
 
 final_indicator = data.frame(life_cycle_nue, net_nutrient_loss, nhi)
-write.table(final_indicator, "3- Results/Paper_3_results/result_UA_N_FADN_NL.csv", sep=",", row.names=FALSE)
-
 
 
 ##########################################
 ## sensitivity Analysis - Life-cycle NUE #
 ##########################################
-
+# Matrix of input parameters
 h_nl = data.frame (x_repl_rate, x_afc, x_af_lw, x_am_lw,
 		x_rf_lw, x_rm_lw, x_mf_lw, x_mm_lw, x_ca_lw, 
 		x_ferti1, milk_year, x_milkfat, x_digest1, x_share_feed, x_proteinmilk, x_n_milk_replacer,
@@ -1754,8 +1707,6 @@ h_nl = data.frame (x_repl_rate, x_afc, x_af_lw, x_am_lw,
 		"P214"=ef_dir_m [,1],"P215"=ef_ind_m [,1],"P216"=ef_ind_fr[,1], x_runoff[,c(1:4)],
 		x_leaching[,c(1,3,5)], x_feed_loss, x_fue, x_prop)
 
-corre_20nl = cor(h_nl)
-write.table(corre_20nl, "3- Results/Paper_3_results/NL/corrfadn.csv", sep=",", row.names=FALSE)
 
 y = with (h_nl, (my_life_cycle_nue ()))
 
@@ -1775,7 +1726,7 @@ new_data = new_data[order(new_data[,2], decreasing = TRUE),]
 
 windows (width=4, height=4)
 barplot(new_data[c(1:20),2], xlab= "", ylab = "SRC", ylim = ,names = new_data[c(1:20),1],
-		main= "Sensitivity analysis for Life-cycle NUE-N - Intensive")
+		main= "")
 #plot (new)
 sum(new_data[,2])
 
@@ -1784,7 +1735,7 @@ sum(new_data[,2])
 ## sensitivity Analysis - Life-cycle NNB #
 ##########################################
 
-
+# Matrix of input parameters
 h1_loss = data.frame (x_repl_rate, x_afc, x_af_lw, x_am_lw,
 		x_rf_lw, x_rm_lw, x_mf_lw, x_mm_lw, x_ca_lw, 
 		x_ferti1, milk_year, x_milkfat, x_digest1, x_share_feed, x_proteinmilk, x_n_milk_replacer,
@@ -1822,7 +1773,7 @@ sum(new_data_loss[,2])
 ####################################
 ## sensitivity Analysis  - NHI    ##
 ####################################
-
+# Matrix of input parameters
 h1_nhi = data.frame (x_repl_rate, x_afc, x_af_lw, x_am_lw,
 		x_rf_lw, x_rm_lw, x_mf_lw, x_mm_lw, x_ca_lw, 
 		x_ferti1, milk_year, x_milkfat, x_digest1, x_share_feed, x_proteinmilk, x_n_milk_replacer,
@@ -1852,13 +1803,12 @@ new_data_nhi = new_data_nhi[order(new_data_nhi[,2], decreasing = TRUE),]
 
 windows (width=4, height=4)
 barplot(new_data_nhi[c(1:20),2], xlab= "", ylab = "SRC", ylim = ,names = new_data_nhi[c(1:20),1],
-		main= "Sensitivity analysis for NHI-N_FADN")
+		main= "")
 #plot (new)
 sum(new_data_nhi[,2])
 
 # Final results table
 result = data.frame( new_data ,new_data_loss,new_data_nhi)
-write.table (result, "3- Results/Paper_3_results/result_all_parameter_N_FADN_NL.csv", sep=",", row.names=FALSE)
 
 ############################################
 ## GRAPHIC REPRESENTATIONS FINAL RESULTS  ##
@@ -1874,15 +1824,8 @@ f_table = as.matrix(final_table[,-1])
 condition = f_table >= 0.01
 sum_co = rowSums(condition)
 final_resu = final_table [sum_co >0,]
-#final_resul = rbind(final_resu[1:5,],  final_resu[9,], final_resu[c(6:8,10:11),])
-
-#names_result = data.frame( c("P1", "P2", "P3", "P4", "P5", "P6",
-							#"P7", "P8", "P9", "P10", "P11"))
-#names(names_result) = c("Categ")
 
 final_result = final_resu #data.frame(names_result, final_resul[,-1])
-write.table(final_result, "3- Results/Paper_3_results/result_sensitivity_N_FADN_NL.csv", sep=",", row.names=FALSE)
-
 
 windows (width=16, height=6)
 par (mar=c(4,4,4,4)+0.1)
@@ -1896,105 +1839,11 @@ abline(v=c(1:nrow(final_result)), col="grey", lty=1)
 abline(h=0.1, col="red", lty=1)
 legend ("topleft", c(" Life-cycle NUE", " Life-cycle net nitrogen balance", " Nitrogen hotspot index"), cex = 1,
 		pt.cex = 1.5, pch=c(13,17,19), bg = "white", col = c("red", "blue", "green"), border="black" , bty="o")
-savePlot("3- Results/Paper_3_results/Nitrogen_SRC_FADN_NL_2010.emf",type="emf")
+savePlot("........emf",type="emf")
 
 
 
 r_square = data.frame(matrix(c(sum(new_data[,2]), sum(new_data_loss[,2]), sum(new_data_nhi[,2]))), nrow=1, ncol=3)
 names(r_square) = c("lcnue", "nnb", "nhi")
-write.table(r_square, "3- Results/Paper_3_results/result_r_square_FADN.csv", sep=",", row.names=FALSE)
-
-
-
-
-#######################################
-#http://stackoverflow.com/questions/25070547/ggplot-side-by-side-geom-bar
-library("reshape2")
-
- 
-fadn    = read.table("3- Results/Paper_3_results/NL/FADN/result_sensitivity_N_FADN_NL.csv", header = T, sep = ",", row.names = NULL) 
-
-
-names(fadn) = c("para","NUE", "NNB", "NHI")
-
-
-fadnm = melt(fadn)
-windows (width=16, height=6)
-ggplot(fadnm, aes(x = para, y= value, fill = variable), xlab="Input Parameters") +
-	geom_bar(stat="identity", width=.7, position = "dodge")+
- 	theme(axis.text = element_text(size=15))+
- 	ylim(c(0,0.5))+
-  	theme_bw(base_size = 12, base_family = "")+
- 	theme(plot.margin = unit(c(1,1,1,1),"cm"))+
-  	theme (panel.grid.major = element_blank(),panel.grid.minor = element_blank())
-  savePlot("3- Results/Paper_3_results/ALL_Nitrogen_SRC_fadn_NL_2010.emf",type="emf")
-
-
-# iNDIVIDUAL plot
-####################
-## Life-cycle-NUE ##
-####################
-
-
-fadn_nue = fadn[,1:2]
-
-fadn_nue$nue2 <- order(fadn_nue$NUE, decreasing = TRUE)
-
-windows (width=8, height=6)
-
-ggplot(fadn_nue, aes( nue2, NUE)) +
-	geom_bar(stat = "identity", fill="yellowgreen", colour="black")+
-	scale_x_discrete("Para", breaks=sort(fadn_nue$nue2), labels=fadn_nue$para[order(fadn_nue$nue2)])+
-	theme(axis.text = element_text(size=15))+
- 	ylim(c(0,0.5))+
-  	theme_bw(base_size = 12, base_family = "")+
- 	theme(plot.margin = unit(c(1,1,1,1),"cm"))+
-  	theme (panel.grid.major = element_blank(),panel.grid.minor = element_blank())
-savePlot("3- Results/Paper_3_results/life_cycle_nue_fadn_NL.emf",type="emf")
-
-
-####################
-## Life-cycle-NNB ##
-####################
-
-fadn_nnb = fadn[,c(1,3)]
-fadn_nnb = fadn_nnb[order(fadn_nnb$NNB, decreasing=TRUE),]
-
-
-fadn_nnb$nnb2 <- order(fadn_nnb$NNB, decreasing = TRUE)
-
-windows (width=8, height=6)
-
-ggplot(fadn_nnb, aes( nnb2, NNB)) +
-	geom_bar(stat = "identity", fill="tomato3", colour="black")+
-	scale_x_discrete("Para", breaks=sort(fadn_nnb$nnb2), labels=fadn_nnb$para[order(fadn_nnb$nnb2)])+
-	theme(axis.text = element_text(size=15))+
- 	ylim(c(0,0.5))+
-  	theme_bw(base_size = 12, base_family = "")+
- 	theme(plot.margin = unit(c(1,1,1,1),"cm"))+
-  	theme (panel.grid.major = element_blank(),panel.grid.minor = element_blank())
-savePlot("3- Results/Paper_3_results/life_cycle_nnb_fadn_NL.emf",type="emf")
-
-
-####################
-## NHI ##
-####################
-
-fadnnhi = fadn[,c(1,4)]
-fadnnhi = fadnnhi[order(fadnnhi$NHI, decreasing=TRUE),]
-
-
-fadnnhi$nhi2 <- order(fadnnhi$NHI, decreasing = TRUE)
-
-windows (width=8, height=6)
-
-ggplot(fadnnhi, aes( nhi2, NHI)) +
-	geom_bar(stat = "identity", fill="darkcyan", colour="black")+
-	scale_x_discrete("Para", breaks=sort(fadnnhi$nhi2), labels=fadnnhi$para[order(fadnnhi$nhi2)])+
-	theme(axis.text = element_text(size=15))+
- 	ylim(c(0,0.5))+
-  	theme_bw(base_size = 12, base_family = "")+
- 	theme(plot.margin = unit(c(1,1,1,1),"cm"))+
-  	theme (panel.grid.major = element_blank(),panel.grid.minor = element_blank())
-savePlot("3- Results/Paper_3_results/nhi_fadn_NL.emf",type="emf")
+write.table(r_square, "...........csv", sep=",", row.names=FALSE)
 
